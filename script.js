@@ -1,94 +1,77 @@
-//*Variable Creation*//
-    //console.log is used to "print" to the console
-//let firstName = 'Arhan';
-//let lastName = 'Sethi';
-//console.log(firstName);
-//console.log(lastName);
-
-
-//*Constants*//
-    //If you attempt to assign to a constant variable, an Uncaught TypeError is thrown.
-//let interestRate = 0.3;
-//const interestRate = 0.3;
-//interestRate = 1;
-//console.log(interestRate);
-
-
-//*Primitive Types*//
-    //Null is used in situations in which you want to clear the value of a variable. 
-//let name = 'Arhan'; 
-    // String Literal
-//let age = 16; 
-    // Number Literal
-//let isApproved = true; 
-    // Boolean Literal
-//let firstName = undefined; 
-    // Undefined
-//let lastName = null; 
-    // Null
-
-
-//*Dynamic Typing*//
-    //In a dynamic language like JS, the type of the object can be changed at runtime.
-//Example:
-//    let name = 'Arhan';
-//    Arhan 
-//    ___________
-//    typeof name
-//    "string"
-//    ___________
-//    name = 1;
-//    1
-//    ___________
-//    typeof name 
-//    "number"
-//    ___________
-
-
-//*Reference Types*//
-// let name = 'Arhan';
-// let age = 16;
-//let person = {
-//    name: 'Arhan', 
-//    age: 16
-//};
-//Dot Notation (Reccomended)
-//  person.name = 'John';
-//  console.log(person);
-
-//Bracket Notation
-//  person['name'] = 'Mary';
-//  console.log(person)
-
-
-//*Arrays*//
-    //Since js is a dynamic langauge, the length and elements of the array can be changed
-//let selectedColors = ['red', 'green'];
-//selectedColors[2] = 'blue'; //dynamically changing length
-//selectedColors[3] = 1;
-//console.log(selectedColors);
-//console.log(selectedColors[0]);
-//console.log(selectedColors.length);
-
-
-//*Functions*//
-//function greet(name, lastName) {
-//    console.log('Hello ' + name + ' ' + lastName);
-//}
-//greet('Arhan', 'Sethi');
-//greet('Vikash');
-
-//*Types of Functions*//
-//Preforming a task
-    function greet(name){
-        console.log('Hello ' + name);
+function createTableFromJsonData() {
+    //requesting data from file.json
+    fetch('file.json')
+        //Creates individual objects from the data in the json file
+        .then(response => response.json())
+        .then(data => {
+            //Creates a new object and assigns the data variable to it.
+            var employeeJson = data;
+            //Creates a new object and sets it to an array of strings containing all of the headers of the table, pulled from the
+            //keys of the elements in the json
+            var headers = Object.keys(employeeJson[0]);
+            //Creates an object to a header row
+            var headerRowHTML = '<tr>';
+            //For loop to iterate over the array to add a table header cell to the headerRowHTML string.
+            for (var i = 0; i < headers.length; i++) {
+                headerRowHTML += '<th>' + headers[i] + '</th>';
+            }
+            //Defines the closing tag for the table row
+            headerRowHTML += '</tr>';
+            //Initializes allRecordsHTML to an empty string
+            var allRecordsHTML = '';
+            //The nested for loop iterates over the employeeJson array and the headers array to create a table with one row 
+            //per employee and one column per header.
+            for (var i = 0; i < employeeJson.length; i++) {
+                allRecordsHTML += '<tr>';
+                for (var j = 0; j < headers.length; j++) {
+                    var header = headers[j];
+                    allRecordsHTML += '<td>' + employeeJson[i][header] + '</td>';
+                }
+                allRecordsHTML += '</tr>';
+            }
+            //Creates a new variable and assigns it the DOM element with the ID display_json_data.
+            var table = document.getElementById('display_json_data');
+            //Sets the HTML content of the table DOM element to the headerRowHTML and allRecordsHTML strings.
+            table.innerHTML = headerRowHTML + allRecordsHTML;
+            //calls the search table method defined below
+            searchTable();
+        });
     }
-    greet('Arhan');
-//Calculates a value
-    function square(number){
-        return number*number;
-    }
-    square(2);
-    let number = square(2);
-    console.log(number);
-
+function searchTable() {
+    //Get search input element
+    const searchInput = document.getElementById('search');
+    //Get all of the table rows
+    const rows = document.querySelectorAll('#display_json_data tr');
+    // Attach an event listener to the search input element.
+    searchInput.addEventListener('keyup', function (event) {
+        // Get the search term from the search input element.
+        const search = event.target.value;
+        //Loop over all of the table rows
+        rows.forEach((row) => {
+            //Get all of the cells in the table row
+            const cells = row.getElementsByTagName('td');
+            //Boolean flag to check if the search term was located
+            var found = false;
+                //loop over all of the cells in the table row
+                for (var i = 0; i < cells.length; i++) {
+                    //Get the cell at the current index
+                    const cell = cells[i];
+                    //Check to see if the cell's text starts with the search term
+                    if (cell.textContent.startsWith(search)) {
+                        //Set the flag to true
+                        found = true;
+                        break;
+                    }
+                }
+            //If the found flag was set to true above, then display that table row
+            if (found) {
+                row.style.display = 'table-row';
+            } else {
+                //Else, hide the table row
+                row.style.display = 'none';
+            } 
+        });
+    });
+}
+//When the page loads, call the searchTable function
+window.onload = createTableFromJsonData;
